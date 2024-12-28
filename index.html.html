@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sri's official website for tracking expenses</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            width: 300px;
+            background-color: #f9f9f9;
+        }
+        .login-container input {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .login-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .login-container button:hover {
+            background-color: #45a049;
+        }
+        .header-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .header-container img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .header-container h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .expense-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .expense-form input {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .expense-list {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 600px;
+            text-align: left;
+        }
+        .expense-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .expense-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f9f9f9;
+            margin-bottom: 5px;
+            padding: 10px;
+            border-radius: 5px;
+            flex-wrap: wrap; 
+        }
+        .expense-list li span {
+            flex: 1;
+            padding-right: 10px; 
+        }
+        .expense-list li button {
+            background-color: #f44336;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .expense-list li button:hover {
+            background-color: #d32f2f;
+        }    
+        @media (max-width: 600px) {
+            .expense-list li {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .expense-list li span {
+                width: 100%;
+                margin-bottom: 10px; 
+            }
+            .expense-list li button {
+                width: 100%;
+                text-align: center;
+            }
+        }       
+        .total-amount {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            margin: 15% auto;
+            width: 300px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        .modal button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body> 
+    <div id="loginPage" class="main-container">
+        <div class="login-container">
+            <h2>Login</h2>
+            <input type="password" id="password" placeholder="Enter password" required>
+            <button onclick="login()">Log In</button>
+            <p id="errorMessage" style="color: red; display: none;">Incorrect password. Please try again.</p>
+        </div>
+    </div>
+    <div id="mainContent" class="main-container" style="display:none;">
+        <div class="header-container">
+            <img src="https://images.pexels.com/photos/26967351/pexels-photo-26967351/free-photo-of-statue-at-batu-caves-in-gombak.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
+                 alt="Statue at Batu Caves">
+            <h1>Welcome to Sri's official website for tracking your expenses</h1>
+        </div>       
+        <button onclick="startTracker()">Start tracking your EXPENSES</button>
+        <div class="expense-form" id="expenseForm" style="display:none;">
+            <input type="text" id="description" placeholder="Enter Expense description" required>
+            <input type="number" id="amount" placeholder="Enter the amount" required>
+            <button onclick="addExpense()">Add Expense</button>
+        </div>
+        <div class="expense-list" id="expenseList" style="display:none;">
+            <h3>Expense Details</h3>
+            <ul id="expenseDetails"></ul>
+        </div>
+        <div class="total-amount" id="totalAmount" style="display:none;">
+            Total: Rs. <span id="total"></span> /-
+        </div>
+    </div>
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <p>Are you sure you want to remove this expense?</p>
+            <button id="confirmDeleteBtn">Yes</button>
+            <button id="cancelDeleteBtn">No</button>
+        </div>
+    </div>
+
+    <script>
+        function login() {
+            const password = document.getElementById("password").value;
+            const correctPassword = "sri12345";
+            const errorMessage = document.getElementById("errorMessage");
+            if (password === correctPassword) {
+                document.getElementById("loginPage").style.display = "none";
+                document.getElementById("mainContent").style.display = "flex";
+            } else {
+                errorMessage.style.display = "block";
+            }
+        }
+
+        class ExpenseTracker {
+            constructor() {
+                this.expenses = [];
+                this.total = 0;
+            }
+
+            addExpense(description, amount) {
+                const expense = {
+                    description: description,
+                    amount: parseFloat(amount),
+                    date: new Date().toLocaleString()
+                };
+                this.expenses.push(expense);
+                this.total += expense.amount;
+                this.displayExpenses();
+            }
+
+            removeExpense(index) {
+                document.getElementById('confirmationModal').style.display = 'block';
+                document.getElementById('confirmDeleteBtn').onclick = () => {
+                    const removedExpense = this.expenses.splice(index, 1)[0];
+                    this.total -= removedExpense.amount;
+                    this.displayExpenses();
+                    document.getElementById('confirmationModal').style.display = 'none';
+                };
+                document.getElementById('cancelDeleteBtn').onclick = () => {
+                    document.getElementById('confirmationModal').style.display = 'none';
+                };
+            }
+
+            displayExpenses() {
+                const expenseDetailsElement = document.getElementById("expenseDetails");
+                expenseDetailsElement.innerHTML = '';
+                this.expenses.forEach((expense, index) => {
+                    const li = document.createElement("li");
+                    li.innerHTML = `<span>${expense.description} - Rs.${expense.amount.toFixed(2)} /- (Date: ${expense.date})</span>
+                                    <button onclick="removeExpense(${index})">Remove</button>`;
+                    expenseDetailsElement.appendChild(li);
+                });
+                document.getElementById("total").textContent = this.total.toFixed(2);
+            }
+        }
+
+        let myTracker;
+
+        function startTracker() {
+            myTracker = new ExpenseTracker();
+            document.getElementById("expenseForm").style.display = "block";
+            document.getElementById("expenseList").style.display = "block";
+            document.getElementById("totalAmount").style.display = "block";
+        }
+
+        function addExpense() {
+            const description = document.getElementById("description").value;
+            const amount = document.getElementById("amount").value;
+
+            if (description && amount && !isNaN(amount)) {
+                myTracker.addExpense(description, amount);
+                document.getElementById("description").value = '';
+                document.getElementById("amount").value = '';
+            }
+        }
+
+        function removeExpense(index) {
+            myTracker.removeExpense(index);
+        }
+    </script>
+</body>
+</html>
